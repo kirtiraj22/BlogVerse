@@ -1,3 +1,68 @@
+@import url("https://fonts.googleapis.com/css2?family=Gelasio&family=Inter:wght@400;500&display=swap");
+@import "@flaticon/flaticon-uicons/css/all/all";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+	* {
+		@apply m-0 p-0 box-border text-base outline-purple/30 duration-100;
+	}
+
+	html {
+		@apply overflow-x-hidden;
+	}
+
+	body {
+		@apply font-inter font-normal text-black;
+	}
+
+	i {
+		@apply mt-0.5;
+	}
+
+	section {
+		@apply py-4 px-[5vw] md:px-[7vw] lg:px-[10vw];
+	}
+
+	::selection {
+		@apply bg-purple/30;
+	}
+
+	img {
+		@apply w-full h-full object-cover;
+	}
+
+	.navbar {
+		@apply z-10 sticky top-0 flex items-center gap-12 w-full px-[5vw] py-5 h-[80px] border-b border-grey bg-white;
+	}
+
+	.btn-dark {
+		@apply whitespace-nowrap bg-black text-white rounded-full py-3 px-6 text-xl capitalize hover:bg-opacity-80;
+	}
+
+	.btn-light {
+		@apply btn-dark bg-grey text-black hover:bg-opacity-100 bg-opacity-60;
+	}
+
+	.link {
+		@apply text-dark-grey hover:text-black hover:bg-grey p-3 px-4 block opacity-75;
+	}
+
+	/* .hide {
+		@apply opacity-0 pointer-events-none duration-300 ease-in-out;
+	}
+
+	.show {
+		@apply opacity-100 pointer-events-auto duration-300 ease-in-out;
+	} */
+
+	.hide {
+		@apply transform -translate-y-full opacity-0 pointer-events-none duration-100 ease-in-out;
+	}
+
+	.show {
+		@apply transform translate-y-0 opacity-100 pointer-events-auto duration-500 ease-in-out;
+	}
+}
