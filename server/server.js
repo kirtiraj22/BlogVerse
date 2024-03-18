@@ -4,6 +4,9 @@ import { z } from "zod";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 
+import User from "./schema/User.js";
+import { nanoid } from "nanoid";
+
 const app = express();
 let PORT = 3000;
 
@@ -26,18 +29,49 @@ const signUpSchema = z.object({
 		.min(6, { message: "Password must be at least 6 characters" }),
 });
 
-app.post("/signup", (req, res) => {
+const generateUsername = async (email) => {
+	let username = email.split("@")[0];
+	let usernameExists = await User.exists({
+		"personal_info.username": username,
+	}).then((result) => result);
+	usernameExists ? (username += nanoid().substring(0, 5)) : "";
+
+	return username;
+};
+
+app.post("/signup", async (req, res) => {
 	const { fullname, email, password } = req.body;
 
 	try {
 		signUpSchema.parse({ fullname, email, password });
 
-		bcrypt.hash(password, 10, (err, hashed_password) => {
-			console.log(hashed_password);
+		const emailExists = await User.exists({
+			"personal_info.email": email,
+		}).then((result) => result);
+
+		if (emailExists) {
+			return res.status(411).json({
+				error: "Email already exists!",
+			});
+		}
+
+		const hashed_password = await bcrypt.hash(password, 10);
+
+		const username = await generateUsername(email);
+		const user = new User({
+			personal_info: {
+				fullname,
+				email,
+				password: hashed_password,
+				username,
+			},
 		});
 
+		const savedUser = await user.save();
+
 		return res.status(200).json({
-			"status": "OK",
+			user: savedUser,
+			status: "OK",
 		});
 	} catch (error) {
 		return res.status(403).json({

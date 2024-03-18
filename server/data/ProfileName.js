@@ -20,5 +20,4 @@ let profile_imgs_name_list = [
 	"Felix",
 	"Kiki",
 ];
-
-module.exports = profile_imgs_name_list;
+export default profile_imgs_name_list;

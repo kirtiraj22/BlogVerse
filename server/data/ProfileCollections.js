@@ -4,4 +4,4 @@ let profile_imgs_collections_list = [
 	"fun-emoji",
 ];
 
-module.exports = profile_imgs_collections_list;
+export default profile_imgs_collections_list;

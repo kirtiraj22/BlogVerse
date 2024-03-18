@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
-import profile_imgs_collections_list from "../data/ProfileCollections";
-import profile_imgs_name_list from "../data/ProfileName";
+import profile_imgs_collections_list from "../data/ProfileCollections.js";
+import profile_imgs_name_list from "../data/ProfileName.js";
 
 const userSchema = mongoose.Schema({
 	personal_info: {
