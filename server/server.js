@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import { z } from "zod";
 import "dotenv/config";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import User from "./schema/User.js";
 import { nanoid } from "nanoid";
@@ -28,6 +29,22 @@ const signUpSchema = z.object({
 		.string()
 		.min(6, { message: "Password must be at least 6 characters" }),
 });
+
+const formatDatatoSend = (user) => {
+	const access_token = jwt.sign(
+		{
+			id: user._id,
+		},
+		process.env.SECRET_KEY
+	);
+
+	return {
+		access_token,
+		profile_img: user.personal_info.profile_img,
+		username: user.personal_info.username,
+		fullname: user.personal_info.fullname,
+	};
+};
 
 const generateUsername = async (email) => {
 	let username = email.split("@")[0];
@@ -70,12 +87,53 @@ app.post("/signup", async (req, res) => {
 		const savedUser = await user.save();
 
 		return res.status(200).json({
-			user: savedUser,
+			user: formatDatatoSend(savedUser),
 			status: "OK",
 		});
 	} catch (error) {
 		return res.status(403).json({
 			"error": error,
+		});
+	}
+});
+
+app.post("/signin", async (req, res) => {
+	const { email, password } = req.body;
+
+	try {
+		const userExists = await User.findOne({
+			"personal_info.email": email,
+		});
+		if (!userExists) {
+			return res.status(403).json({
+				message: "Email not found!",
+			});
+		}
+
+		bcrypt.compare(
+			password,
+			userExists.personal_info.password,
+			(err, result) => {
+				if (err) {
+					console.log(err);
+					return res.status(403).json({
+						error: "Error occured while logging in",
+					});
+				}
+				if (!result) {
+					return res.status(403).json({
+						"error": "Incorrect password!",
+					});
+				} else {
+					return res.status(200).json({
+						data: formatDatatoSend(userExists),
+					});
+				}
+			}
+		);
+	} catch (err) {
+		return res.status(500).json({
+			message: "Internal server error",
 		});
 	}
 });
