@@ -4,14 +4,16 @@ import { z } from "zod";
 import "dotenv/config";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import cors from "cors";
+import { nanoid } from "nanoid";
 
 import User from "./schema/User.js";
-import { nanoid } from "nanoid";
 
 const app = express();
 let PORT = 3000;
 
 app.use(express.json());
+app.use(cors());
 
 mongoose.connect(process.env.DB_LOCATION, {
 	autoIndex: true,
@@ -88,7 +90,7 @@ app.post("/signup", async (req, res) => {
 
 		return res.status(200).json({
 			user: formatDatatoSend(savedUser),
-			status: "OK",
+			message: "Account created successfully!",
 		});
 	} catch (error) {
 		return res.status(403).json({
@@ -127,6 +129,7 @@ app.post("/signin", async (req, res) => {
 				} else {
 					return res.status(200).json({
 						data: formatDatatoSend(userExists),
+						message: "Signed in Successfully",
 					});
 				}
 			}
