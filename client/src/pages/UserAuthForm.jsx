@@ -3,12 +3,28 @@ import InputBox from "../components/InputBox";
 import GoogleIcon from "../images/google.png";
 import AnimationWrapper from "../common/PageAnimation";
 import { useRef } from "react";
+import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 
 const UserAuthForm = ({ type }) => {
 	const authForm = useRef();
 
-	const userAuthThroughServer = (serverRoute, formData) => {};
+	const userAuthThroughServer = async (serverRoute, formData) => {
+		try {
+			console.log(import.meta.env.VITE_SERVER_DOMAIN);
+			const response = await axios.post(
+				import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
+				formData
+			);
+			console.log("data1", response);
+			// let toastMessage = response.data;
+			toast.success("Account created successfully!");
+		} catch (error) {
+			console.log(error.message);
+			toast.error(error.message);
+			// toast.error(response.data.error);
+		}
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
