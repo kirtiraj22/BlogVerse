@@ -2,12 +2,51 @@ import { Link } from "react-router-dom";
 import InputBox from "../components/InputBox";
 import GoogleIcon from "../images/google.png";
 import AnimationWrapper from "../common/PageAnimation";
+import { useRef } from "react";
 
 const UserAuthForm = ({ type }) => {
+	const authForm = useRef();
+
+	const handleSubmit = (e) => {
+		e.preventDefault();
+
+		let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
+		let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
+
+		let form = new FormData(authForm.current);
+		let formData = {};
+		for (let [key, value] of form.entries()) {
+			formData[key] = value;
+		}
+
+		let { fullname, email, password } = formData;
+
+		if (fullname) {
+			if (fullname.length < 3) {
+				return console.log({
+					"Error": "Fullname must be atleast 3 letters long",
+				});
+			}
+		}
+		if (!email.length) {
+			return console.log({ "Error": "Enter Email" });
+		}
+
+		if (!emailRegex.test(email)) {
+			return console.log({ "Error": "Email is invalid" });
+		}
+		if (!passwordRegex.test(password)) {
+			return console.log({
+				"Error":
+					"Password should be 6 to 20 characters long with a numeric, 1 lowercase and 1 uppercase letters",
+			});
+		}
+	};
+
 	return (
 		<AnimationWrapper keyValue={type}>
 			<section className="h-cover flex items-center justify-center">
-				<form className="w-[80%] max-w-[400px]">
+				<form ref={authForm} className="w-[80%] max-w-[400px]">
 					<h1 className="text-4xl font-gelasio capitalize text-center mb-24">
 						{type == "sign-in" ? "Welcome back" : "Join us today"}
 					</h1>
@@ -34,7 +73,11 @@ const UserAuthForm = ({ type }) => {
 						icon="fi-rr-key"
 					/>
 
-					<button className="btn-dark center mt-14" type="submit">
+					<button
+						className="btn-dark center mt-14"
+						type="submit"
+						onClick={handleSubmit}
+					>
 						{type.replace("-", " ")}
 					</button>
 
