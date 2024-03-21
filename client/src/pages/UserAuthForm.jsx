@@ -2,13 +2,11 @@ import { Link } from "react-router-dom";
 import InputBox from "../components/InputBox";
 import GoogleIcon from "../images/google.png";
 import AnimationWrapper from "../common/PageAnimation";
-import { useRef } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
+import { storeInSession } from "../common/Session";
 
 const UserAuthForm = ({ type }) => {
-	const authForm = useRef();
-
 	const userAuthThroughServer = async (serverRoute, formData) => {
 		try {
 			console.log(import.meta.env.VITE_SERVER_DOMAIN);
@@ -16,12 +14,15 @@ const UserAuthForm = ({ type }) => {
 				import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
 				formData
 			);
-			console.log("data1", response);
+			storeInSession("user", JSON.stringify(response.data.data));
+			console.log("sessionStorage: ", sessionStorage);
+			const toastMessage = response.data.message;
 			// let toastMessage = response.data;
-			toast.success("Account created successfully!");
+			toast.success(toastMessage);
 		} catch (error) {
-			console.log(error.message);
-			toast.error(error.message);
+			console.log(error);
+			const errorMessage = error.response.data.message;
+			toast.error(errorMessage);
 			// toast.error(response.data.error);
 		}
 	};
@@ -34,7 +35,7 @@ const UserAuthForm = ({ type }) => {
 		let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
 		let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
 
-		let form = new FormData(authForm.current);
+		let form = new FormData(formElement);
 		let formData = {};
 		for (let [key, value] of form.entries()) {
 			formData[key] = value;
@@ -67,7 +68,7 @@ const UserAuthForm = ({ type }) => {
 		<AnimationWrapper keyValue={type}>
 			<section className="h-cover flex items-center justify-center">
 				<Toaster />
-				<form ref={authForm} className="w-[80%] max-w-[400px]">
+				<form id="formElement" className="w-[80%] max-w-[400px]">
 					<h1 className="text-4xl font-gelasio capitalize text-center mb-24">
 						{type == "sign-in" ? "Welcome back" : "Join us today"}
 					</h1>
