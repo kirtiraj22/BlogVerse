@@ -5,10 +5,22 @@ import UserNavigationPanel from "./UserNavigationPanel";
 const Navbar = () => {
 	const [searchBoxVisibility, setSearchBoxVisibility] = useState(false);
 
+	const [userNavPanel, setUserNavPanel] = useState(false);
+
 	const {
 		userAuth,
 		userAuth: { access_token, profile_img },
 	} = useContext(UserContext);
+
+	const handleUserNavPanel = () => {
+		setUserNavPanel((currVal) => !currVal);
+	};
+
+	const handleBlur = () => {
+		setTimeout(() => {
+			setUserNavPanel(false);
+		}, 200);
+	};
 
 	return (
 		<>
@@ -52,7 +64,11 @@ const Navbar = () => {
 									<i className="fi fi-rr-bell text-2xl block mt-1"></i>
 								</button>
 							</Link>
-							<div className="relative">
+							<div
+								className="relative"
+								onClick={handleUserNavPanel}
+								onBlur={handleBlur}
+							>
 								<button className="w-12 h-12 mt-1">
 									<img
 										src={profile_img}
@@ -60,7 +76,7 @@ const Navbar = () => {
 										className="w-full h-full object-cover rounded-full"
 									/>
 								</button>
-								<UserNavigationPanel />
+								{userNavPanel ? <UserNavigationPanel /> : ""}
 							</div>
 						</>
 					) : (
