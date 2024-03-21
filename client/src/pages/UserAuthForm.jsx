@@ -1,12 +1,21 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import InputBox from "../components/InputBox";
 import GoogleIcon from "../images/google.png";
 import AnimationWrapper from "../common/PageAnimation";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 import { storeInSession } from "../common/Session";
+import { useContext } from "react";
+import { UserContext } from "../App";
 
 const UserAuthForm = ({ type }) => {
+	let {
+		userAuth: { access_token },
+		setUserAuth,
+	} = useContext(UserContext);
+
+	console.log(access_token);
+
 	const userAuthThroughServer = async (serverRoute, formData) => {
 		try {
 			console.log(import.meta.env.VITE_SERVER_DOMAIN);
@@ -14,14 +23,16 @@ const UserAuthForm = ({ type }) => {
 				import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
 				formData
 			);
-			storeInSession("user", JSON.stringify(response.data.data));
+			const userData = response.data;
+			storeInSession("user", JSON.stringify(userData.data));
+			setUserAuth(userData.data);
 			console.log("sessionStorage: ", sessionStorage);
-			const toastMessage = response.data.message;
+			const toastMessage = userData.message;
 			// let toastMessage = response.data;
 			toast.success(toastMessage);
 		} catch (error) {
 			console.log(error);
-			const errorMessage = error.response.data.message;
+			const errorMessage = error.response.data.error;
 			toast.error(errorMessage);
 			// toast.error(response.data.error);
 		}
@@ -64,7 +75,9 @@ const UserAuthForm = ({ type }) => {
 		userAuthThroughServer(serverRoute, formData);
 	};
 
-	return (
+	return access_token ? (
+		<Navigate to="/" />
+	) : (
 		<AnimationWrapper keyValue={type}>
 			<section className="h-cover flex items-center justify-center">
 				<Toaster />
