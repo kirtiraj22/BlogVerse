@@ -6,11 +6,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import { nanoid } from "nanoid";
+import admin from "firebase-admin"
+import {getAuth} from "firebase-admin/auth"
 
+import serviceAccountKey from "./blogverse-687ca-firebase-adminsdk-wjusr-acc2dabb39.json"
 import User from "./schema/User.js";
 
 const app = express();
 let PORT = 3000;
+
+admin.initializeApp({
+	credential: admin.credential.cert(serviceAccountKey)
+})
 
 app.use(express.json());
 app.use(cors());
@@ -140,6 +147,16 @@ app.post("/signin", async (req, res) => {
 		});
 	}
 });
+
+app.post("google-auth", async(req, res)){
+	const { access_token } = req.body;
+	const decodedUser = await getAuth().verifyIdToken(access_token)
+	const {email, name, picture} = decodedUser
+
+	picture = picture.replace("s96-c", "s384-c")
+
+	const user = await User.findOne({"personal_info.email": email}).select("personal_info.fullname personal_info.username personal_info.profile_img google_auth")
+}
 
 app.listen(PORT, () => {
 	console.log(`App running on PORT : ${PORT}`);
