@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 import admin from "firebase-admin";
 import { getAuth } from "firebase-admin/auth";
 
-import serviceAccountKey from "./blogverse-687ca-firebase-adminsdk-wjusr-acc2dabb39.json";
+import serviceAccountKey from "./blogverse-687ca-firebase-adminsdk-wjusr-acc2dabb39.json" assert { type: "json" };
 import User from "./schema/User.js";
 
 const app = express();
@@ -115,32 +115,38 @@ app.post("/signin", async (req, res) => {
 		});
 		if (!userExists) {
 			return res.status(403).json({
-				message: "Email not found!",
+				"error": "Email not found!",
 			});
 		}
 
-		bcrypt.compare(
-			password,
-			userExists.personal_info.password,
-			(err, result) => {
-				if (err) {
-					console.log(err);
-					return res.status(403).json({
-						error: "Error occured while logging in",
-					});
+		if (userExists.google_auth) {
+			bcrypt.compare(
+				password,
+				userExists.personal_info.password,
+				(err, result) => {
+					if (err) {
+						console.log(err);
+						return res.status(403).json({
+							error: "Error occured while logging in",
+						});
+					}
+					if (!result) {
+						return res.status(403).json({
+							"error": "Incorrect password!",
+						});
+					} else {
+						return res.status(200).json({
+							data: formatDatatoSend(userExists),
+							message: "Signed in Successfully",
+						});
+					}
 				}
-				if (!result) {
-					return res.status(403).json({
-						"error": "Incorrect password!",
-					});
-				} else {
-					return res.status(200).json({
-						data: formatDatatoSend(userExists),
-						message: "Signed in Successfully",
-					});
-				}
-			}
-		);
+			);
+		}else{
+			return res.status(403).json({
+				"error" : "Account was created using google. Try logging with google."
+			})
+		}
 	} catch (err) {
 		return res.status(500).json({
 			message: "Internal server error",
@@ -148,20 +154,18 @@ app.post("/signin", async (req, res) => {
 	}
 });
 
-app.post("google-auth", async (req, res) => {
-	const { access_token } = req.body;
-
+app.post("/google-auth", async (req, res) => {
+	let { access_token } = req.body;
 	try {
 		const decodedUser = await getAuth().verifyIdToken(access_token);
-		const { email, name, picture } = decodedUser;
+		let { email, name, picture } = decodedUser;
 
 		// improve resolution of the profile image
 		picture = picture.replace("s96-c", "s384-c");
 
-		const user = await User.findOne({ "personal_info.email": email })
-			.select(
-				"personal_info.fullname personal_info.username personal_info.profile_img google_auth"
-			)
+		let user = await User.findOne({ "personal_info.email": email }).select(
+			"personal_info.fullname personal_info.username personal_info.profile_img google_auth"
+		);
 
 		if (user) {
 			if (!user.google_auth) {
@@ -173,13 +177,12 @@ app.post("google-auth", async (req, res) => {
 		} else {
 			let username = await generateUsername(email);
 			user = new User({
+				google_auth: true,
 				personal_info: {
 					fullname: name,
 					email,
-					profile_img: pitcure,
 					username,
 				},
-				google_auth: true,
 			});
 
 			await user.save();
@@ -188,8 +191,9 @@ app.post("google-auth", async (req, res) => {
 	} catch (err) {
 		console.log(err);
 		return res.status(500).json({
-			"error": "Failed to authenticate with google. Try with some other google account"
-		})
+			"error":
+				"Failed to authenticate with google. Try with some other google account",
+		});
 	}
 });
 
