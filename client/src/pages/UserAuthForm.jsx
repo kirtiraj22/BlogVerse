@@ -25,8 +25,11 @@ const UserAuthForm = ({ type }) => {
 				formData
 			);
 			const userData = response.data;
-			storeInSession("user", JSON.stringify(userData.data));
-			setUserAuth(userData.data);
+			// storeInSession("user", JSON.stringify(userData.data));
+			storeInSession("user", JSON.stringify(userData));
+			console.log("user data: ", userData)
+			setUserAuth(userData);
+			// setUserAuth(userData.data);
 			console.log("sessionStorage: ", sessionStorage);
 			const toastMessage = userData.message;
 			// let toastMessage = response.data;
@@ -80,9 +83,10 @@ const UserAuthForm = ({ type }) => {
 		e.preventDefault();
 		try {
 			const user = await authWithGoogle();
+			console.log("user: ", user)
 			let serverRoute = "/google-auth"
 			let formData = {
-				access_token: user.access_token
+				access_token: user.accessToken
 			}
 
 			userAuthThroughServer(serverRoute, formData);
