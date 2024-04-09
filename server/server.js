@@ -6,18 +6,18 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cors from "cors";
 import { nanoid } from "nanoid";
-import admin from "firebase-admin"
-import {getAuth} from "firebase-admin/auth"
+import admin from "firebase-admin";
+import { getAuth } from "firebase-admin/auth";
 
-import serviceAccountKey from "./blogverse-687ca-firebase-adminsdk-wjusr-acc2dabb39.json"
+import serviceAccountKey from "./blogverse-687ca-firebase-adminsdk-wjusr-acc2dabb39.json";
 import User from "./schema/User.js";
 
 const app = express();
 let PORT = 3000;
 
 admin.initializeApp({
-	credential: admin.credential.cert(serviceAccountKey)
-})
+	credential: admin.credential.cert(serviceAccountKey),
+});
 
 app.use(express.json());
 app.use(cors());
@@ -148,15 +148,50 @@ app.post("/signin", async (req, res) => {
 	}
 });
 
-app.post("google-auth", async(req, res)){
+app.post("google-auth", async (req, res) => {
 	const { access_token } = req.body;
-	const decodedUser = await getAuth().verifyIdToken(access_token)
-	const {email, name, picture} = decodedUser
 
-	picture = picture.replace("s96-c", "s384-c")
+	try {
+		const decodedUser = await getAuth().verifyIdToken(access_token);
+		const { email, name, picture } = decodedUser;
 
-	const user = await User.findOne({"personal_info.email": email}).select("personal_info.fullname personal_info.username personal_info.profile_img google_auth")
-}
+		// improve resolution of the profile image
+		picture = picture.replace("s96-c", "s384-c");
+
+		const user = await User.findOne({ "personal_info.email": email })
+			.select(
+				"personal_info.fullname personal_info.username personal_info.profile_img google_auth"
+			)
+
+		if (user) {
+			if (!user.google_auth) {
+				return res.status(403).json({
+					"error":
+						"This email was signed up without google. Please log in with password to access the account",
+				});
+			}
+		} else {
+			let username = await generateUsername(email);
+			user = new User({
+				personal_info: {
+					fullname: name,
+					email,
+					profile_img: pitcure,
+					username,
+				},
+				google_auth: true,
+			});
+
+			await user.save();
+		}
+		return res.status(200).json(formatDatatoSend(user));
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({
+			"error": "Failed to authenticate with google. Try with some other google account"
+		})
+	}
+});
 
 app.listen(PORT, () => {
 	console.log(`App running on PORT : ${PORT}`);
