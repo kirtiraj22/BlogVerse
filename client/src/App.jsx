@@ -3,6 +3,7 @@ import Navbar from "./components/Navbar";
 import UserAuthForm from "./pages/UserAuthForm";
 import { createContext, useEffect, useState } from "react";
 import { lookInSession } from "./common/Session";
+import Editor from "./pages/Editor";
 
 export const UserContext = createContext({});
 
@@ -21,6 +22,7 @@ function App() {
 	return (
 		<UserContext.Provider value={{ userAuth, setUserAuth }}>
 			<Routes>
+				<Route path="/editor" element={<Editor />}/>
 				<Route path="/" element={<Navbar />}>
 					<Route
 						path="signin"
