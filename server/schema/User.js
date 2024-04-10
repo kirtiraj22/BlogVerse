@@ -45,10 +45,10 @@ const userSchema = mongoose.Schema({
 				}`;
 			},
 		},
-		google_auth: {
-			type: Boolean,
-			default: false
-		},
+	},
+	google_auth: {
+		type: Boolean,
+		default: false
 	},
 });
 

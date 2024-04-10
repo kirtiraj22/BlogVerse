@@ -1,4 +1,4 @@
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputBox from "../components/InputBox";
 import GoogleIcon from "../images/google.png";
 import AnimationWrapper from "../common/PageAnimation";
@@ -14,7 +14,7 @@ const UserAuthForm = ({ type }) => {
 		userAuth: { access_token },
 		setUserAuth,
 	} = useContext(UserContext);
-
+	const navigate = useNavigate();
 	console.log(access_token);
 
 	const userAuthThroughServer = async (serverRoute, formData) => {
@@ -34,6 +34,7 @@ const UserAuthForm = ({ type }) => {
 			const toastMessage = userData.message;
 			// let toastMessage = response.data;
 			toast.success(toastMessage);
+			navigate("/")
 		} catch (error) {
 			console.log(error);
 			const errorMessage = error.response.data.error;

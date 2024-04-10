@@ -6,10 +6,10 @@ import { removeFromSession } from "../common/Session";
 
 const UserNavigationPanel = () => {
 	const {
-		userAuth: { username },
+		userAuth : {data},
 		setUserAuth,
 	} = useContext(UserContext);
-
+	console.log("data: ", data)
 	const signOutUser = () => {
 		removeFromSession("user");
 		setUserAuth({
@@ -31,7 +31,7 @@ const UserNavigationPanel = () => {
 					<i className="fi fi-rr-file-edit"></i>
 					<p>Write</p>
 				</Link>
-				<Link to={`/user/${username}`} className="link pl-8 py-4">
+				<Link to={`/user/${data?.username}`} className="link pl-8 py-4">
 					Profile
 				</Link>
 				<Link to="/dashboard/blogs" className="link pl-8 py-4">
@@ -46,7 +46,8 @@ const UserNavigationPanel = () => {
 					onClick={signOutUser}
 				>
 					<h1 className="font-bold text-xl mb-1">Sign Out</h1>
-					<p className="text-dark-grey">@{username}</p>
+					{/* <p className="text-dark-grey">@{username}</p> */}
+					<p className="text-dark-grey">@{data?.username}</p>
 				</button>
 			</div>
 		</AnimationWrapper>

@@ -8,10 +8,11 @@ const Navbar = () => {
 	const [userNavPanel, setUserNavPanel] = useState(false);
 
 	const {
-		userAuth,
-		userAuth: { access_token, profile_img },
+		userAuth: { data },
 	} = useContext(UserContext);
-
+	// console.log("userAuth", userAuth)
+	console.log("tkn: ", data)
+	
 	const handleUserNavPanel = () => {
 		setUserNavPanel((currVal) => !currVal);
 	};
@@ -57,7 +58,7 @@ const Navbar = () => {
 						<p>Write</p>
 					</Link>
 
-					{access_token ? (
+					{data?.access_token ? (
 						<>
 							<Link to="/dashboard/notification">
 								<button className="w-12 h-12 rounded-full bg-grey relative hover:bg-black/10">
@@ -71,7 +72,7 @@ const Navbar = () => {
 							>
 								<button className="w-12 h-12 mt-1">
 									<img
-										src={profile_img}
+										src={data?.profile_img}
 										alt="profile image"
 										className="w-full h-full object-cover rounded-full"
 									/>

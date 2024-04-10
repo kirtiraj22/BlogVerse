@@ -119,7 +119,7 @@ app.post("/signin", async (req, res) => {
 			});
 		}
 
-		if (userExists.google_auth) {
+		if (!userExists.google_auth) {
 			bcrypt.compare(
 				password,
 				userExists.personal_info.password,
@@ -184,7 +184,6 @@ app.post("/google-auth", async (req, res) => {
 					username,
 				},
 			});
-
 			await user.save();
 		}
 		return res.status(200).json(formatDatatoSend(user));
